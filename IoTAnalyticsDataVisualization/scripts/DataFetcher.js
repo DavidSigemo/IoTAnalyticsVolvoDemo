@@ -1,14 +1,14 @@
 ﻿var gaugeGraph;
-var lastGaugeData;
+var lastGaugeData = [];
 var delayGraph;
 var delayCurrentData = [];
 
-if (window.addEventListener) {
-    window.addEventListener('resize', resizeHandlerDelay, false);
-}
-else if (window.attachEvent) {
-    window.attachEvent('onresize', resizeHandlerDelay);
-}
+//if (window.addEventListener) {
+//    window.addEventListener('resize', resizeHandlerDelay, false);
+//}
+//else if (window.attachEvent) {
+//    window.attachEvent('onresize', resizeHandlerDelay);
+//}
 
 function init() {
     initCharts();
@@ -75,6 +75,18 @@ function initCharts() {
         },
         size: {
             height: 180
+        },
+        padding: {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+        },
+        tooltip: {
+            format: {
+                title: function (x) { return 'Risk för fel under kommande minut'; },
+                value: function (x) { return x + '% (' + moment(lastGaugeData[0]).format('hh:mm:ss') + ')';}
+            }
         }
     });
 
@@ -229,13 +241,13 @@ function drawDelayGraph(jsonData) {
 
 function drawGaugeGraph(jsonData) {
 
-    if (lastGaugeData !== jsonData.label) {
+    if (lastGaugeData[1] !== jsonData.label) {
         gaugeGraph.load({
             columns: [['Risk', jsonData.label]]
         });
     }
 
-    lastGaugeData = jsonData.label;
+    lastGaugeData = [jsonData.time, jsonData.label];
 }
 
 function resizeHandler() {
@@ -256,27 +268,4 @@ function resizeHandler() {
 
 
     delayGraph.draw(delayDataTable, options);
-}
-
-window.onbeforeunload = function () {
-    removeSubscription();
-}
-
-window.addEventListener("beforeunload", function (e) {
-    removeSubscription();
-}, false);
-
-function removeSubscription() {
-    var serviceURL = '/Home/RemoveSubscription';
-
-    $.ajax({
-        type: "GET",
-        url: serviceURL,
-        data: param = "",
-        contentType: "text/plain; charset=utf-8",
-        dataType: "text",
-        success: function () { return "Done"; },
-        error: function () { return false; }
-    });
-    return "Bye now!";
 }

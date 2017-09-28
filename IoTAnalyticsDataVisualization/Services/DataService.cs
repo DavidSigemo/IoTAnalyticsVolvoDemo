@@ -11,7 +11,7 @@ namespace IoTAnalyticsDataVisualization.Services
         private string SASKEYNAME = Environment.GetEnvironmentVariable("SHARED_ACCESS_POLICY_NAME");
         private string SASACCESSKEY = Environment.GetEnvironmentVariable("SHARED_ACCESS_POLICY_KEY");
         private const string NAMESPACEURL = "https://kentoriotandanalyticsservicebus.servicebus.windows.net";
-        private const string SBQUEUE = "webservicebustopic"; //sessiontypedataqueue
+        private const string SBQUEUE = "webservicebustopic";
 
         public List<string> dataPoints { get; set; }
 
@@ -55,28 +55,38 @@ namespace IoTAnalyticsDataVisualization.Services
             }
         }
 
-        public void CreateSubscription(string subscriptionName)
+        public async Task<bool> GetOrCreateSubscription(string subscriptionName)
         {
-            RemoveOldSubscriptions();
-            namespaceManager.CreateSubscription(SBQUEUE, subscriptionName);
-        }
-
-        public void RemoveSubscription(string subscriptionName)
-        {
-            namespaceManager.DeleteSubscription(SBQUEUE, subscriptionName);
-        }
-
-        public void RemoveOldSubscriptions()
-        {
-            var allSubscriptions = namespaceManager.GetSubscriptions(SBQUEUE);
-
-            foreach (var currentSubscription in allSubscriptions)
+            var checkExistingSubscription = namespaceManager.SubscriptionExists(SBQUEUE, subscriptionName);
+            if (checkExistingSubscription)
             {
-                if (currentSubscription.AccessedAt < DateTime.Now.ToUniversalTime().AddMinutes(-10))
-                {
-                    namespaceManager.DeleteSubscription(SBQUEUE, currentSubscription.Name);
-                }
+                await ClearSubscriptionMessages(subscriptionName);
+                return true;
             }
+            var newSubscription = namespaceManager.CreateSubscription(SBQUEUE, subscriptionName);
+            newSubscription.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
+            newSubscription.MaxDeliveryCount = 1000;
+            namespaceManager.UpdateSubscription(newSubscription);
+            return true;
+        }
+
+        public async Task<bool> ClearSubscriptionMessages(string subscriptionName)
+        {
+            var subscription = namespaceManager.GetSubscription(SBQUEUE,subscriptionName);
+            if (subscription.MessageCountDetails.ActiveMessageCount == 0)
+            {
+                return true;
+            }
+
+            SubscriptionClient agentSubscriptionClient = factory.CreateSubscriptionClient(SBQUEUE, subscriptionName, ReceiveMode.PeekLock);
+            var messages = await agentSubscriptionClient.ReceiveBatchAsync(int.Parse(subscription.MessageCountDetails.ActiveMessageCount.ToString()));
+            foreach (var message in messages)
+            {
+                await message.CompleteAsync();
+            }
+
+            var newSubscriptionMessageCount = namespaceManager.GetSubscription(SBQUEUE, subscriptionName).MessageCountDetails.ActiveMessageCount;
+            return true;
         }
     }
 }

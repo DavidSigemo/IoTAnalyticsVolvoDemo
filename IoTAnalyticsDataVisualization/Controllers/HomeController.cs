@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using IoTAnalyticsDataVisualization.Services;
 using System;
+using System.Web;
 
 namespace IoTAnalyticsDataVisualization.Controllers
 {
@@ -10,11 +11,23 @@ namespace IoTAnalyticsDataVisualization.Controllers
         static DataService dataService = new DataService();
 
         // GET: Home
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            var subscriptionName = Guid.NewGuid().ToString();
-            Session["subscriptionName"] = subscriptionName;
-            dataService.CreateSubscription(subscriptionName);
+            var subscriptionName = "";
+            HttpCookie subscriptionNameCookie = Request.Cookies["subscriptionName"];
+            if (subscriptionNameCookie == null || string.IsNullOrEmpty(subscriptionNameCookie.Value))
+            {
+                subscriptionName = Guid.NewGuid().ToString();
+                subscriptionNameCookie = new HttpCookie("subscriptionName", subscriptionName);
+            }
+            else {
+                subscriptionName = subscriptionNameCookie.Value;
+            }
+
+            subscriptionNameCookie.Expires = DateTime.Now.AddMinutes(5);
+            Response.SetCookie(subscriptionNameCookie);
+
+            var subscriptionExists = await dataService.GetOrCreateSubscription(subscriptionName);
             return View();
         }
 
@@ -22,21 +35,15 @@ namespace IoTAnalyticsDataVisualization.Controllers
         [HttpGet]
         public async Task<string> GetDataSessionType()
         {
-            var subscriptionName = Session["subscriptionName"] as string;
+            HttpCookie subscriptionNameCookie = Request.Cookies["subscriptionName"];
+
+            var subscriptionName = subscriptionNameCookie.Value;
             var returnVal = await dataService.GetDataAsync(subscriptionName);
 
             if (!string.IsNullOrEmpty(returnVal))
                 return returnVal;
 
             return string.Empty;
-        }
-        
-        [HttpGet]
-        public void RemoveSubscription()
-        {
-            var subscriptionName = Session["subscriptionName"] as string;
-
-            dataService.RemoveSubscription(subscriptionName);
         }
     }
 }
