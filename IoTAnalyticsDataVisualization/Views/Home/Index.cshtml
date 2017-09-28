@@ -1,0 +1,209 @@
+﻿@model List<string>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <script src="~/scripts/jquery-3.2.1.min.js"></script>
+    <script src="~/scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <link href="~/Content/c3.min.css" rel="stylesheet" />
+    <script src="~/scripts/d3/d3.min.js" charset="utf-8" type="text/javascript"></script>
+    <script src="~/scripts/c3.min.js" type="text/javascript"></script>
+    <script src="~/scripts/moment.min.js"></script>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="~/scripts/DataFetcher.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', { 'packages': ['corechart', 'line', 'gauge'] });
+        google.charts.setOnLoadCallback(init);
+    </script>
+    <style type="text/css">
+        body {
+            background-color: rgb(240,240,240);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana;
+        }
+
+        .container-fluid {
+            position: relative;
+        }
+
+        .contentContainer {
+            width: 90%;
+            margin: 10px auto 5px;
+        }
+
+            .contentContainer div {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .contentContainer .row {
+                margin-top: 10px;
+            }
+
+        .chart {
+            width: 100%;
+            min-height: 230px;
+        }
+
+        @@media (min-width: 768px) {
+            .col-sm-offset-1 {
+                margin-left: 1.333334% !important;
+            }
+
+            .col-sm-2 {
+                width: 24% !important;
+            }
+        }
+
+        @@media (max-width: 767px) {
+            .col-xs-offset-2 {
+                margin-left: 4% !important;
+            }
+
+            .col-xs-5 {
+                width: 48% !important;
+            }
+        }
+
+        @@media (min-height: 750px) {
+            #delayGraph {
+                height: 350px !important;
+            }
+        }
+
+
+        .numberTile {
+            min-height: 48px;
+            min-width: 65px;
+            margin-top: 5px;
+            display: flex;
+            font-size: 20px;
+            background-color: #E8E8E8;
+            padding-left: 0px;
+        }
+
+            .numberTile div {
+                padding-left: 5px;
+            }
+
+            .numberTile p {
+                font-weight: 200;
+                font-size: 14px;
+                margin-bottom: 0;
+            }
+
+            .numberTile span {
+                font-weight: 300;
+                font-size: 20px;
+                text-align: center;
+            }
+
+        #delayGraph {
+            height: 180px;
+        }
+
+        .gaugeChartContainer {
+            position: relative;
+        }
+
+        #gaugeChart {
+            margin: 0 auto;
+        }
+
+        .tileColor {
+            height: 48px;
+            width: 15px;
+            padding-left: 0;
+        }
+
+        .color1 {
+            background-color: #7FBA00;
+        }
+
+        .color2 {
+            background-color: #F25022;
+        }
+
+        .color3 {
+            background-color: #FFB901;
+        }
+
+        .color4 {
+            background-color: #0072C6;
+        }
+
+        .c3-chart-arcs-background {
+            fill: #E8E8E8 !important;
+        }
+    </style>
+    <title>Index</title>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="contentContainer">
+            <div class="row">
+                <div class="col-md-12 gaugeChartContainer">
+                    <div id="gaugeChart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="contentContainer">
+            <div class="row">
+                <div id="tile1" class="col-sm-2 col-xs-5 numberTile">
+                    <div class="col-xs-1 tileColor color1"></div>
+                    <div class="col-xs-11">
+                        <p>
+                            Successes
+                            <br />
+                            <span id="labelStatus300">0</span>
+                        </p>
+                    </div>
+                </div>
+                <div id="tile2" class="col-sm-2 col-sm-offset-1 col-xs-5 col-xs-offset-2 numberTile">
+                    <div class="col-xs-1 tileColor color2"></div>
+                    <div class="col-xs-11">
+                        <p>
+                            Failures
+                            <br />
+                            <span id="labelStatus700">0</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div id="tile3" class="col-sm-2 col-sm-offset-1 col-xs-5 numberTile">
+                    <div class="col-xs-1 tileColor color3"></div>
+                    <div class="col-xs-11">
+                        <p>
+                            Timeouts
+                            <br />
+                            <span id="labelStatusTimeout">0</span>
+                        </p>
+                    </div>
+                </div>
+                <div id="tile4" class="col-sm-2 col-sm-offset-1 col-xs-5 col-xs-offset-2 numberTile">
+                    <div class="col-xs-1 tileColor color4"></div>
+                    <div class="col-xs-11">
+                        <p>
+                            Others
+                            <br />
+                            <span id="labelStatusOther">0</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="contentContainer">
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="delayGraph" class=""></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
