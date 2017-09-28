@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width" />
     <script src="~/scripts/jquery-3.2.1.min.js"></script>
     <script src="~/scripts/jquery.unobtrusive-ajax.min.js"></script>
-    <link href="~/Content/c3.min.css" rel="stylesheet" />
+    <link href="~/Content/c3.min.css" rel="stylesheet" type="text/css" />
     <script src="~/scripts/d3/d3.min.js" charset="utf-8" type="text/javascript"></script>
     <script src="~/scripts/c3.min.js" type="text/javascript"></script>
     <script src="~/scripts/moment.min.js"></script>
@@ -22,6 +22,10 @@
         google.charts.setOnLoadCallback(init);
     </script>
     <style type="text/css">
+        html {
+            max-width: 1200px;
+        }
+
         body {
             background-color: rgb(240,240,240);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana;
@@ -31,14 +35,23 @@
             position: relative;
         }
 
+        .topContainer {
+            position: relative;
+        }
+
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
         .contentContainer {
             width: 90%;
             margin: 10px auto 5px;
         }
 
             .contentContainer div {
-                padding-left: 0;
-                padding-right: 0;
+                /*padding-left: 0;
+                padding-right: 0;*/
             }
 
             .contentContainer .row {
@@ -50,32 +63,43 @@
             min-height: 230px;
         }
 
+        .headerText {
+            text-align: center;
+        }
+
         @@media (min-width: 768px) {
-            .col-sm-offset-1 {
-                margin-left: 1.333334% !important;
+            .tileContainer {
+                position: absolute;
+                bottom: 0;
+                right: 0;
             }
 
-            .col-sm-2 {
-                width: 24% !important;
-            }
-        }
-
-        @@media (max-width: 767px) {
-            .col-xs-offset-2 {
-                margin-left: 4% !important;
+            .col-sm-5 {
+                width: 49%;
             }
 
-            .col-xs-5 {
-                width: 48% !important;
+            .col-sm-offset-2 {
+                margin-left: 2%;
             }
-        }
 
-        @@media (min-height: 750px) {
             #delayGraph {
                 height: 350px !important;
             }
         }
 
+        @@media (max-width: 767px) {
+            .headerText {
+                display: none !important;
+            }
+        }
+
+        .col-xs-5 {
+            width: 48%;
+        }
+
+        .col-xs-offset-2 {
+            margin-left: 4%;
+        }
 
         .numberTile {
             min-height: 48px;
@@ -146,53 +170,56 @@
 <body>
     <div class="container-fluid">
         <div class="contentContainer">
-            <div class="row">
-                <div class="col-md-12 gaugeChartContainer">
+            <div class="row topContainer">
+                <div class="col-sm-5 gaugeChartContainer">
+                    <h4 class="headerText">Risk of error within one minute</h4>
                     <div id="gaugeChart"></div>
                 </div>
-            </div>
-        </div>
-        <div class="contentContainer">
-            <div class="row">
-                <div id="tile1" class="col-sm-2 col-xs-5 numberTile">
-                    <div class="col-xs-1 tileColor color1"></div>
-                    <div class="col-xs-11">
-                        <p>
-                            Successes
-                            <br />
-                            <span id="labelStatus300">0</span>
-                        </p>
+                <div class="col-sm-5 col-sm-offset-2 col-xs-12 col-xs-offset-0 tileContainer">
+                    <h4 class="headerText">Status of past 100 requests</h4>
+                    <div class="row">
+                        <div class="col-xs-5 numberTile">
+                            <div class="col-xs-1 tileColor color1"></div>
+                            <div class="col-xs-11">
+                                <p>
+                                    Successes
+                                    <br />
+                                    <span id="labelStatus300">0</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-xs-5 col-xs-offset-2 numberTile">
+                            <div class="col-xs-1 tileColor color2"></div>
+                            <div class="col-xs-11">
+                                <p>
+                                    Failures
+                                    <br />
+                                    <span id="labelStatus700">0</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div id="tile2" class="col-sm-2 col-sm-offset-1 col-xs-5 col-xs-offset-2 numberTile">
-                    <div class="col-xs-1 tileColor color2"></div>
-                    <div class="col-xs-11">
-                        <p>
-                            Failures
-                            <br />
-                            <span id="labelStatus700">0</span>
-                        </p>
-                    </div>
-                </div>
-
-                <div id="tile3" class="col-sm-2 col-sm-offset-1 col-xs-5 numberTile">
-                    <div class="col-xs-1 tileColor color3"></div>
-                    <div class="col-xs-11">
-                        <p>
-                            Timeouts
-                            <br />
-                            <span id="labelStatusTimeout">0</span>
-                        </p>
-                    </div>
-                </div>
-                <div id="tile4" class="col-sm-2 col-sm-offset-1 col-xs-5 col-xs-offset-2 numberTile">
-                    <div class="col-xs-1 tileColor color4"></div>
-                    <div class="col-xs-11">
-                        <p>
-                            Others
-                            <br />
-                            <span id="labelStatusOther">0</span>
-                        </p>
+                    <div class="row">
+                        <div class="col-xs-5 numberTile">
+                            <div class="col-xs-1 tileColor color3"></div>
+                            <div class="col-xs-11">
+                                <p>
+                                    Timeouts
+                                    <br />
+                                    <span id="labelStatusTimeout">0</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-xs-5 col-xs-offset-2 numberTile">
+                            <div class="col-xs-1 tileColor color4"></div>
+                            <div class="col-xs-11">
+                                <p>
+                                    Others
+                                    <br />
+                                    <span id="labelStatusOther">0</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -200,6 +227,7 @@
         <div class="contentContainer">
             <div class="row">
                 <div class="col-md-12">
+                    <h4 class="headerText">Delay of recent requests </h4>
                     <div id="delayGraph" class=""></div>
                 </div>
             </div>

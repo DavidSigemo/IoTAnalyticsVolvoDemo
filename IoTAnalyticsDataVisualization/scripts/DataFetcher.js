@@ -3,13 +3,6 @@ var lastGaugeData = [];
 var delayGraph;
 var delayCurrentData = [];
 
-//if (window.addEventListener) {
-//    window.addEventListener('resize', resizeHandlerDelay, false);
-//}
-//else if (window.attachEvent) {
-//    window.attachEvent('onresize', resizeHandlerDelay);
-//}
-
 function init() {
     initCharts();
     StartInterval(500);
@@ -85,7 +78,7 @@ function initCharts() {
         tooltip: {
             format: {
                 title: function (x) { return 'Risk för fel under kommande minut'; },
-                value: function (x) { return x + '% (' + moment(lastGaugeData[0]).format('hh:mm:ss') + ')';}
+                value: function (x) { return x + '% (' + moment(lastGaugeData[0]).format('hh:mm:ss') + ')'; }
             }
         }
     });
@@ -109,6 +102,31 @@ function initCharts() {
 
     delayGraph.draw(initDelayDataTable, initDelayOptions);
 
+    function resizeHandler() {
+        var delayDataTable = new google.visualization.DataTable();
+
+        delayDataTable.addColumn('string', 'X');
+        delayDataTable.addColumn('number', 'Max');
+        delayDataTable.addColumn('number', 'Delay');
+        delayDataTable.addColumn('number', 'Average');
+        var newDataTableData = delayCurrentData.map(function (item) {
+            return ["", item[1], item[2], item[3]];
+        })
+
+
+        delayDataTable.addRows(
+            newDataTableData
+        );
+
+        var options = getDelayChartOptions();
+        delayGraph.draw(delayDataTable, options);
+    }
+
+    window.addEventListener('resize', function () {
+        setTimeout(function () {
+            resizeHandler();
+        }, 100)
+    }, true);
 }
 
 function StartInterval(intervalTime) {
@@ -226,6 +244,7 @@ function drawDelayGraph(jsonData) {
     delayDataTable.addColumn('number', 'Max');
     delayDataTable.addColumn('number', 'Delay');
     delayDataTable.addColumn('number', 'Average');
+
     var newDataTableData = delayCurrentData.map(function (item) {
         return ["", item[1], item[2], item[3]];
     })
@@ -234,7 +253,6 @@ function drawDelayGraph(jsonData) {
     delayDataTable.addRows(
         newDataTableData
     );
-
 
     delayGraph.draw(delayDataTable, options);
 }
@@ -248,24 +266,4 @@ function drawGaugeGraph(jsonData) {
     }
 
     lastGaugeData = [jsonData.time, jsonData.label];
-}
-
-function resizeHandler() {
-    var delayDataTable = new google.visualization.DataTable();
-
-    delayDataTable.addColumn('string', 'X');
-    delayDataTable.addColumn('number', 'Max');
-    delayDataTable.addColumn('number', 'Delay');
-    delayDataTable.addColumn('number', 'Average');
-    var newDataTableData = delayCurrentData.map(function (item) {
-        return ["", item[1], item[2], item[3]];
-    })
-
-
-    delayDataTable.addRows(
-        newDataTableData
-    );
-
-
-    delayGraph.draw(delayDataTable, options);
 }
