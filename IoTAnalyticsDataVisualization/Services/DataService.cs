@@ -11,7 +11,7 @@ namespace IoTAnalyticsDataVisualization.Services
         private string SASKEYNAME = Environment.GetEnvironmentVariable("SHARED_ACCESS_POLICY_NAME");
         private string SASACCESSKEY = Environment.GetEnvironmentVariable("SHARED_ACCESS_POLICY_KEY");
         private const string NAMESPACEURL = "https://kentoriotandanalyticsservicebus.servicebus.windows.net";
-        private const string SBQUEUE = "webservicebustopic";
+        private const string TOPICPATH = "webservicebustopic";
 
         public List<string> dataPoints { get; set; }
 
@@ -25,18 +25,18 @@ namespace IoTAnalyticsDataVisualization.Services
             sasProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(SASKEYNAME, SASACCESSKEY, new TimeSpan(100, 0, 0, 0));
             namespaceManager = new NamespaceManager(NAMESPACEURL, sasProvider);
             factory = MessagingFactory.Create(ServiceBusEnvironment.CreateServiceUri("sb", "KentorIoTandAnalyticsServiceBus", string.Empty), sasProvider);
-            queueClient = factory.CreateQueueClient(SBQUEUE);
+            queueClient = factory.CreateQueueClient(TOPICPATH);
         }
 
         public async Task<string> GetDataAsync(string subscriptionName)
         {
-            var subscriptionMessageCount = namespaceManager.GetSubscription(SBQUEUE, subscriptionName).MessageCountDetails.ActiveMessageCount;
+            var subscriptionMessageCount = namespaceManager.GetSubscription(TOPICPATH, subscriptionName).MessageCountDetails.ActiveMessageCount;
             if (subscriptionMessageCount == 0)
             {
                 return string.Empty;
             }
 
-            SubscriptionClient agentSubscriptionClient = factory.CreateSubscriptionClient(SBQUEUE, subscriptionName, ReceiveMode.PeekLock);
+            SubscriptionClient agentSubscriptionClient = factory.CreateSubscriptionClient(TOPICPATH, subscriptionName, ReceiveMode.PeekLock);
 
 
             BrokeredMessage message = await agentSubscriptionClient.ReceiveAsync(TimeSpan.FromSeconds(5));
@@ -57,13 +57,13 @@ namespace IoTAnalyticsDataVisualization.Services
 
         public async Task<bool> GetOrCreateSubscription(string subscriptionName)
         {
-            var checkExistingSubscription = namespaceManager.SubscriptionExists(SBQUEUE, subscriptionName);
+            var checkExistingSubscription = namespaceManager.SubscriptionExists(TOPICPATH, subscriptionName);
             if (checkExistingSubscription)
             {
                 await ClearSubscriptionMessages(subscriptionName);
                 return true;
             }
-            var newSubscription = namespaceManager.CreateSubscription(SBQUEUE, subscriptionName);
+            var newSubscription = namespaceManager.CreateSubscription(TOPICPATH, subscriptionName);
             newSubscription.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
             newSubscription.MaxDeliveryCount = 1000;
             namespaceManager.UpdateSubscription(newSubscription);
@@ -72,20 +72,20 @@ namespace IoTAnalyticsDataVisualization.Services
 
         public async Task<bool> ClearSubscriptionMessages(string subscriptionName)
         {
-            var subscription = namespaceManager.GetSubscription(SBQUEUE,subscriptionName);
+            var subscription = namespaceManager.GetSubscription(TOPICPATH,subscriptionName);
             if (subscription.MessageCountDetails.ActiveMessageCount == 0)
             {
                 return true;
             }
 
-            SubscriptionClient agentSubscriptionClient = factory.CreateSubscriptionClient(SBQUEUE, subscriptionName, ReceiveMode.PeekLock);
+            SubscriptionClient agentSubscriptionClient = factory.CreateSubscriptionClient(TOPICPATH, subscriptionName, ReceiveMode.PeekLock);
             var messages = await agentSubscriptionClient.ReceiveBatchAsync(int.Parse(subscription.MessageCountDetails.ActiveMessageCount.ToString()));
             foreach (var message in messages)
             {
                 await message.CompleteAsync();
             }
 
-            var newSubscriptionMessageCount = namespaceManager.GetSubscription(SBQUEUE, subscriptionName).MessageCountDetails.ActiveMessageCount;
+            var newSubscriptionMessageCount = namespaceManager.GetSubscription(TOPICPATH, subscriptionName).MessageCountDetails.ActiveMessageCount;
             return true;
         }
     }

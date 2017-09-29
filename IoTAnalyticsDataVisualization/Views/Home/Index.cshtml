@@ -23,16 +23,20 @@
     </script>
     <style type="text/css">
         html {
-            max-width: 1200px;
+            position: relative;
         }
 
         body {
             background-color: rgb(240,240,240);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana;
+            margin: 0 auto;
         }
 
         .container-fluid {
+            max-width: 1400px;
             position: relative;
+            padding-left: 0;
+            padding-right: 0;
         }
 
         .topContainer {
@@ -44,15 +48,15 @@
             margin-right: 0;
         }
 
+            .row div {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
         .contentContainer {
             width: 90%;
             margin: 10px auto 5px;
         }
-
-            .contentContainer div {
-                /*padding-left: 0;
-                padding-right: 0;*/
-            }
 
             .contentContainer .row {
                 margin-top: 10px;
@@ -68,12 +72,6 @@
         }
 
         @@media (min-width: 768px) {
-            .tileContainer {
-                position: absolute;
-                bottom: 0;
-                right: 0;
-            }
-
             .col-sm-5 {
                 width: 49%;
             }
@@ -91,6 +89,18 @@
             .headerText {
                 display: none !important;
             }
+
+            .numberTile p {
+                font-size: 14px !important;
+            }
+
+            .numberTile span {
+                font-size: 20px !important;
+            }
+
+            .tileColor {
+                height: 48px !important;
+            }
         }
 
         .col-xs-5 {
@@ -106,7 +116,7 @@
             min-width: 65px;
             margin-top: 5px;
             display: flex;
-            font-size: 20px;
+            font-size: 22px;
             background-color: #E8E8E8;
             padding-left: 0px;
         }
@@ -117,13 +127,13 @@
 
             .numberTile p {
                 font-weight: 200;
-                font-size: 14px;
+                font-size: 16px;
                 margin-bottom: 0;
             }
 
             .numberTile span {
                 font-weight: 300;
-                font-size: 20px;
+                font-size: 22px;
                 text-align: center;
             }
 
@@ -140,7 +150,7 @@
         }
 
         .tileColor {
-            height: 48px;
+            height: 60px;
             width: 15px;
             padding-left: 0;
         }

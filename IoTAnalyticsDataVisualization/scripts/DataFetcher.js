@@ -67,7 +67,7 @@ function initCharts() {
             }
         },
         size: {
-            height: 180
+            height: 140
         },
         padding: {
             top: 0,
